@@ -1,17 +1,23 @@
-import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { LandingNav, Hero, Features, HowItWorks, Stats, LandingFooter } from '../components/landing/LandingComponents';
+import { LandingNav, Hero, Features, HowItWorks, Stats, Pricing, LandingFooter } from '../components/landing/LandingComponents';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { useAppActions } from '../hooks/useAppActions';
 
 const Landing = () => {
-  const { setAppActive, projects } = useApp();
+  const { isAuthenticated, currentWorkspaceId, setAppActive, projects, workspaces } = useApp();
   const { checkDeadlineAlerts } = useAppActions();
+  const navigate = useNavigate();
   useScrollReveal();
 
   const launchApp = () => {
     setAppActive(true);
     checkDeadlineAlerts(projects);
+    if (isAuthenticated) {
+      navigate(`/workspace/${currentWorkspaceId || workspaces[0]?.id || 'w-default'}`);
+    } else {
+      navigate('/login');
+    }
   };
 
   return (
@@ -22,6 +28,7 @@ const Landing = () => {
       <Features />
       <HowItWorks />
       <Stats />
+      <Pricing onLaunch={launchApp} />
       <LandingFooter />
     </div>
   );

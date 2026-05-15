@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useAppActions } from '../../hooks/useAppActions';
 
@@ -12,10 +13,20 @@ export const ProjectModal = () => {
 
   if (!projectModalOpen) return null;
 
+  const closeModal = () => setProjectModalOpen(false);
+
+  const handleCreate = () => {
+    if (!name.trim()) return alert('Name required');
+    saveProject({ name, color, deadline });
+    setName('');
+    setColor('#c4531a');
+    setDeadline('');
+  };
+
   return (
-    <div className="modal-overlay open" onClick={() => setProjectModalOpen(false)}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div className="modal-header"><div className="modal-title">New Project</div><button className="modal-close" onClick={() => setProjectModalOpen(false)}>✕</button></div>
+    <motion.div className="modal-overlay open" onClick={closeModal} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.16 }}>
+      <motion.div className="modal" onClick={e => e.stopPropagation()} initial={{ y: 12, scale: 0.98 }} animate={{ y: 0, scale: 1 }} transition={{ duration: 0.18, ease: 'easeOut' }}>
+        <div className="modal-header"><div className="modal-title">New Project</div><button className="modal-close" onClick={closeModal}>✕</button></div>
         <div className="modal-body">
           <div className="form-group"><label className="form-label">Project Name *</label><input className="form-input" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Website Redesign" /></div>
           <div className="form-row">
@@ -26,10 +37,10 @@ export const ProjectModal = () => {
           </div>
         </div>
         <div className="modal-footer">
-          <button className="btn btn-outline" onClick={() => setProjectModalOpen(false)}>Cancel</button>
-          <button className="btn btn-accent" onClick={() => name ? saveProject({name, color, deadline}) : alert('Name required')}>Create Project</button>
+          <button className="btn btn-outline" onClick={closeModal}>Cancel</button>
+          <button className="btn btn-accent" onClick={handleCreate}>Create Project</button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };

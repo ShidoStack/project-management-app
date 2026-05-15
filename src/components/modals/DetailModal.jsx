@@ -1,34 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { MEMBERS } from '../../data/initialData';
 import { formatDate, isOverdue, getTagClass, memberById } from '../../utils/helpers';
 import { useAppActions } from '../../hooks/useAppActions';
+import { AttachmentList } from '../common/CommonComponents';
 
 export const DetailModal = () => {
-  const { detailModalTaskId, setDetailModalTaskId, projects, setProjects, setTaskModal } = useApp();
+  const { detailModalTaskId, setDetailModalTaskId, projects, setProjects, setTaskModal, currentUser } = useApp();
   const { deleteTask, moveTask } = useAppActions();
   
-  const [task, setTask] = useState(null);
-  const [proj, setProj] = useState(null);
   const [newComment, setNewComment] = useState('');
-  
-  useEffect(() => {
+
+  const detail = (() => {
     if (!detailModalTaskId) return;
     for (const p of projects) {
       const t = p.tasks.find(t => t.id === detailModalTaskId);
-      if (t) { setTask(t); setProj(p); break; }
+      if (t) return { task: t, proj: p };
     }
-  }, [detailModalTaskId, projects]);
+    return null;
+  })();
+
+  const task = detail?.task;
+  const proj = detail?.proj;
 
   if (!detailModalTaskId || !task) return null;
   const clDone = (task.checklist || []).filter(c => c.done).length;
   const clTotal = (task.checklist || []).length;
 
   const onUpdateChecklist = (clId, done) => {
+    const now = new Date().toISOString();
     setProjects(prev => prev.map(p => ({
       ...p,
       tasks: p.tasks.map(t => t.id === task.id ? {
         ...t,
+        updatedAt: now,
         checklist: t.checklist.map(cl => cl.id === clId ? { ...cl, done } : cl)
       } : t)
     })));
@@ -36,17 +41,29 @@ export const DetailModal = () => {
 
   const onPostComment = () => {
     if (!newComment.trim()) return;
-    const comment = { id: 'c'+Date.now(), author: 'm1', text: newComment, time: 'just now' };
+    const now = new Date().toISOString();
+    const eventId = now.replace(/\D/g, '');
+    const comment = { id: `c${eventId}`, author: 'm1', text: newComment, time: 'just now', createdAt: now };
     setProjects(prev => prev.map(p => ({
-      ...p,
-      tasks: p.tasks.map(t => t.id === task.id ? { ...t, comments: [...(t.comments||[]), comment] } : t)
+      ...(p.id === proj.id ? {
+        ...p,
+        activity: [{
+          id: `act-${eventId}`,
+          type: 'comment',
+          message: `Commented on "${task.title}".`,
+          taskId: task.id,
+          createdAt: now,
+          user: currentUser?.name || 'Alex Reed'
+        }, ...(p.activity || [])].slice(0, 80)
+      } : p),
+      tasks: p.tasks.map(t => t.id === task.id ? { ...t, updatedAt: now, comments: [...(t.comments||[]), comment] } : t)
     })));
     setNewComment('');
   };
 
   return (
-    <div className="modal-overlay open" onClick={() => setDetailModalTaskId(null)}>
-      <div className="modal modal-lg" onClick={e => e.stopPropagation()}>
+    <motion.div className="modal-overlay open" onClick={() => setDetailModalTaskId(null)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.16 }}>
+      <motion.div className="modal modal-lg" onClick={e => e.stopPropagation()} initial={{ y: 12, scale: 0.98 }} animate={{ y: 0, scale: 1 }} transition={{ duration: 0.18, ease: 'easeOut' }}>
         <div className="modal-header">
           <div><div className="modal-title">{task.title}</div><div style={{display:'flex',gap:8,marginTop:6}}>
             <span className={`task-priority p-${task.priority}`}>{task.priority}</span>
@@ -78,12 +95,7 @@ export const DetailModal = () => {
               {(task.attachments||[]).length > 0 && (
                 <div className="detail-section">
                   <div className="detail-section-title">Attachments</div>
-                  {task.attachments.map((a,i) => (
-                    <div key={i} className="attach-item">
-                      <span className="attach-icon">{a.name.endsWith('.pdf')?'📄':a.name.endsWith('.fig')?'🎨':'📁'}</span>
-                      <span className="attach-name">{a.name}</span><span className="attach-size">{a.size}</span>
-                    </div>
-                  ))}
+                  <AttachmentList attachments={task.attachments} />
                 </div>
               )}
               <div className="detail-section">
@@ -118,7 +130,7 @@ export const DetailModal = () => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };

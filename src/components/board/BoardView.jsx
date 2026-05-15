@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useAppActions } from '../../hooks/useAppActions';
 import { formatDate, isOverdue, isDueSoon, getTagClass, memberById } from '../../utils/helpers';
@@ -10,7 +11,15 @@ export const TaskCard = ({ task, onDragStart, onClick }) => {
   const clTotal = (task.checklist || []).length;
 
   return (
-    <div className={`task-card p-${task.priority}`} draggable onDragStart={() => onDragStart(task.id)} onClick={onClick}>
+    <motion.div
+      layout
+      className={`task-card p-${task.priority}`}
+      draggable
+      onDragStart={() => onDragStart(task.id)}
+      onClick={onClick}
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.16, ease: 'easeOut' }}
+    >
       {task.tag && <div className="task-tags"><span className={`task-tag ${getTagClass(task.tag)}`}>{task.tag}</span></div>}
       <div className={`task-priority p-${task.priority}`}>{task.priority}</div>
       <div className="task-title">{task.title}</div>
@@ -34,7 +43,7 @@ export const TaskCard = ({ task, onDragStart, onClick }) => {
           {task.attachments?.length > 0 && <span className="task-attach-count">📎 {task.attachments.length}</span>}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -50,7 +59,7 @@ export const KanbanColumn = ({ col, tasks, onDragStart, onDrop, onNewTask, onOpe
         <span className="col-menu">⋯</span>
       </div>
       <div className="col-cards">
-        {tasks.length === 0 && <div className="empty-state"><div className="es-icon">📭</div><p>Drop tasks here</p></div>}
+        {tasks.length === 0 && <div className="empty-state"><div className="es-icon">○</div><p>A quiet lane. Drop work here when it is ready.</p></div>}
         {tasks.map(t => (
           <TaskCard key={t.id} task={t} onDragStart={onDragStart} onClick={() => onOpenDetail(t.id)} />
         ))}

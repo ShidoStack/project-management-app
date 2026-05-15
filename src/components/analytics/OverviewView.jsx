@@ -1,4 +1,3 @@
-import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { MEMBERS } from '../../data/initialData';
 import { isOverdue } from '../../utils/helpers';

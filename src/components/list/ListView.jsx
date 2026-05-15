@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { formatDate, isOverdue, getTagClass, memberById } from '../../utils/helpers';
 
@@ -48,7 +48,7 @@ export const ListView = () => {
               <td>{t.tag && <span className={`task-tag ${getTagClass(t.tag)}`}>{t.tag}</span>}</td>
             </tr>
           ))}
-          {filteredTasks.length === 0 && <tr><td colSpan="6"><div className="empty-state"><div className="es-icon">📋</div><p>No tasks found</p></div></td></tr>}
+          {filteredTasks.length === 0 && <tr><td colSpan="6"><div className="empty-state"><div className="es-icon">○</div><p>No matching work yet. Try another filter or create the next clear task.</p></div></td></tr>}
         </tbody>
       </table>
     </div>

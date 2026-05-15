@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 
+const DEEP_FOCUS_SECONDS = 59 * 60 + 59;
+
 export const useFocusTimer = () => {
   const { focusActive, focusPaused, setFocusSeconds, setFocusActive, toast, addNotification } = useApp();
 
@@ -12,9 +14,9 @@ export const useFocusTimer = () => {
           if (prev <= 1) {
             clearInterval(interval);
             setFocusActive(false);
-            toast('🎉 Focus session complete! Take a break.', 'success');
-            addNotification('Focus session of 25 minutes completed! 🎉');
-            return 25 * 60;
+            toast('Deep focus complete. Take a real break.', 'success');
+            addNotification('A 59:59 deep focus session was completed.');
+            return DEEP_FOCUS_SECONDS;
           }
           return prev - 1;
         });

@@ -1,6 +1,4 @@
-import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { formatDate } from '../../utils/helpers';
 
 export const CalendarView = () => {
   const { filteredTasks, calendarMonth, calendarYear, setCalendarMonth, setCalendarYear, setDetailModalTaskId } = useApp();

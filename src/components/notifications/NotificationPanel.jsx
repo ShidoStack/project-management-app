@@ -1,8 +1,7 @@
-import React from 'react';
 import { useApp } from '../../context/AppContext';
 
 export const NotificationPanel = () => {
-  const { notifPanelOpen, setNotifPanelOpen, notifications, setNotifications, toast } = useApp();
+  const { notifPanelOpen, notifications, setNotifications, toast } = useApp();
   if (!notifPanelOpen) return null;
 
   return (
